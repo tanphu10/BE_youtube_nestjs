@@ -47,6 +47,12 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
+
+  @Get('/search/:userName')
+  search(@Param('userName') userName: string) {
+    return this.userService.search(userName);
+  }
+
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     type: UploadDto,

@@ -1,19 +1,31 @@
 import {
+  Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpException,
   InternalServerErrorException,
+  Param,
+  Post,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { VideoService } from './video.service';
 import { video } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-@ApiTags('video')
-@Controller('video')
+import { CreateVideoDto } from './dto/create-video.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { UploadDto } from './dto/upload.dto';
+// import { UploadVideoDto } from './dto/upload.dto';
+
+@ApiTags('Video')
+@Controller('api')
 export class VideoController {
   constructor(
     private readonly videoService: VideoService,
@@ -21,7 +33,7 @@ export class VideoController {
   ) {}
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Get('/get-video')
+  @Get('/video')
   @HttpCode(200)
   getVideo(@Req() req): Promise<video[]> {
     // check roles
@@ -36,6 +48,45 @@ export class VideoController {
       }
       throw new InternalServerErrorException('Lỗi ...');
     }
+  }
+  @Get('/video/:typeId')
+  getVideoTypeId(@Param('typeId') typeId: number) {
+    return this.videoService.getVideoTypeId(+typeId);
+  }
+  @Get('/video-by-Id/:id')
+  getVideoById(@Param('id') id: number) {
+    return this.videoService.getVideoById(+id);
+  }
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: UploadDto,
+  })
+  @Post('/upload')
+  @UseInterceptors(
+    FileInterceptor('video', {
+      storage: diskStorage({
+        destination: process.cwd() + '/public/video',
+        filename: (req, file, callback) =>
+          callback(null, new Date().getTime() + '_' + file.originalname),
+      }),
+    }),
+  )
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: process.cwd() + '/public/img',
+        filename: (req, file, callback) =>
+          callback(null, new Date().getTime() + '_' + file.originalname),
+      }),
+    }),
+  )
+  create(
+    @UploadedFile() video: Express.Multer.File,
+    @UploadedFile() image: Express.Multer.File,
+    @Body() body: CreateVideoDto,
+    @Headers('token') token: string,
+  ) {
+    return this.videoService.create(body, video, image, token);
   }
 }
 

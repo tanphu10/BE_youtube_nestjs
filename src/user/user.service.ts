@@ -92,4 +92,14 @@ export class UserService {
 
     // }
   }
+  async search(userName: string) {
+    let data = await this.prisma.users.findMany({
+      where: {
+        full_name: { contains: userName },
+        // email: { contains: userName },
+      },
+    });
+    console.log(data);
+    return data;
+  }
 }

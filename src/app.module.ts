@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { JwtStrategy } from './strategy/jwt.stategy';
 import { CommentModule } from './comment/comment.module';
+import { LikeModule } from './like/like.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CommentModule } from './comment/comment.module';
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     CommentModule,
+    LikeModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

@@ -17,7 +17,7 @@ import { ConfigService } from '@nestjs/config';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
-@ApiTags('comment')
+@ApiTags('Comment')
 @Controller('api')
 export class CommentController {
   constructor(
